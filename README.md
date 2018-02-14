@@ -46,7 +46,7 @@ Use `UTF8` when writing your files. See the Javadoc comments in the template cod
 
 The official name of this homework is `JSONWriter`. This should be the name you use for your Eclipse Java project and the name you use when running the homework test script.
 
-You must pass all unit tests when running the `/home/public/cs212/homework` script on the lab computers to receive a 100% on this homework assignment.
+You must pass all unit tests when running the `/home4/public/cs212/homework` script on the lab computers to receive a 100% on this homework assignment.
 
 ## Hints ##
 
