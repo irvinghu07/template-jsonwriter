@@ -1,7 +1,11 @@
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -44,9 +48,30 @@ public class JSONWriter {
 	 */
 	private static void asArray(Writer writer, TreeSet<Integer> elements, int level) throws IOException {
 		/*
-		 * TODO This is optional, but if you implement this method you can reuse it
-		 * in several places in this class.
+		 * TODO This is optional, but if you implement this method you can reuse
+		 * it in several places in this class.
 		 */
+
+		/*
+		 * TODO This is optional, but if you implement this method you can reuse
+		 * it in several places in this class.
+		 */
+		int count = 0;
+		writer.write("[\n");
+		for (Iterator<Integer> iterator = elements.iterator(); iterator.hasNext();) {
+			Integer integer = (Integer) iterator.next();
+			writer.write(indent(level + 1));
+			writer.write(integer.toString());
+			count++;
+			if (count < elements.size()) {
+				writer.write(",");
+			}
+			writer.write("\n");
+		}
+		writer.write(indent(level));
+		writer.write("]");
+		writer.flush();
+
 	}
 
 	/**
@@ -60,6 +85,9 @@ public class JSONWriter {
 	 */
 	public static void asArray(TreeSet<Integer> elements, Path path) throws IOException {
 		// TODO Use try-with-resources (no catch block needed)
+		try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			asArray(bw, elements, 0);
+		}
 	}
 
 	/**
@@ -73,8 +101,29 @@ public class JSONWriter {
 	 */
 	public static void asObject(TreeMap<String, Integer> elements, Path path) throws IOException {
 		// TODO Use try-with-resources (no catch block needed)
+		try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			int level = 0, index = 0;
+			bw.write(indent(level));
+			bw.write("{\n");
+			for (Iterator<String> iterator = elements.keySet().iterator(); iterator.hasNext();) {
+				String str = (String) iterator.next();
+				Integer value = elements.get(str);
+				bw.write(indent(level + 1));
+				bw.write(String.format("%s: %d", quote(str), value.intValue()));
+				index++;
+				if (index < elements.keySet().size()) {
+					bw.write(",\n");
+				} else {
+					bw.write("\n");
+				}
+
+			}
+			bw.write(indent(level));
+			bw.write("}\n");
+			bw.flush();
+		}
 	}
-	
+
 	/**
 	 * Writes the set of elements as a JSON object with a nested array to the
 	 * path using UTF8.
@@ -87,5 +136,28 @@ public class JSONWriter {
 	 */
 	public static void asNestedObject(TreeMap<String, TreeSet<Integer>> elements, Path path) throws IOException {
 		// TODO Use try-with-resources (no catch block needed)
+		try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+
+			int level = 0, index = 0;
+			bw.write(indent(level));
+			bw.write("{\n");
+			for (Iterator<String> iterator = elements.keySet().iterator(); iterator.hasNext();) {
+				index++;
+				String key = (String) iterator.next();
+				TreeSet<Integer> values = elements.get(key);
+				bw.write(indent(level + 1));
+				bw.write(String.format("%s: ", quote(key)));
+				asArray(bw, values, level + 1);
+				if (index < elements.keySet().size()) {
+					bw.write(",\n");
+				} else {
+					bw.write("\n");
+				}
+			}
+			bw.write(indent(level));
+			bw.write("}\n");
+			bw.flush();
+
+		}
 	}
 }
